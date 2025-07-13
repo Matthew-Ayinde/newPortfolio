@@ -366,6 +366,15 @@ function ProjectsScene() {
   );
 }
 
+const handleDownload = () => {
+  const link = document.createElement('a');
+  link.href = '/resume.pdf';
+  link.download = 'My_Resume.pdf';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 export default function Portfolio() {
   const [activeSection, setActiveSection] = useState("home");
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -588,6 +597,7 @@ export default function Portfolio() {
                 className="px-12 py-5 border-2 border-blue-500 rounded-full font-semibold text-lg hover:bg-blue-500/10 transition-all duration-300 flex items-center gap-3 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/30"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={handleDownload}
               >
                 <FaDownload />
                 Download Resume
