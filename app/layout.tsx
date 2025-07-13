@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Matthew Ayinde Porfolio",
+  title: "Matthew Ayinde || Porfolio",
   description: "A showcase of my work and skills",
 };
 
