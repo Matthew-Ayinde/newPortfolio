@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { saveEmailToCSV } from '@/lib/emailStorage';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,6 +16,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('📧 New email captured:', email);
+
+    // Save to CSV file (with duplicate check)
+    const isNewEmail = await saveEmailToCSV(email, 'popup');
+    
+    if (!isNewEmail) {
+      // Email already exists, but still send welcome email
+      console.log('⚠️ Email already in database, skipping duplicate');
+    }
 
     // Send notification to admin
     const transporter = nodemailer.createTransport({

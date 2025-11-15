@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { saveEmailToCSV } from '@/lib/emailStorage';
 
 interface ContactFormData {
   firstName: string;
@@ -79,6 +80,9 @@ This is an automated confirmation email from matthewayinde.com
     `;
     
     console.log('📤 Sending emails...');
+    
+    // Save email to CSV (with duplicate check)
+    await saveEmailToCSV(body.email, 'contact');
     
     // Send email to admin
     await transporter.sendMail({
