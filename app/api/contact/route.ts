@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { saveEmailToCSV } from '@/lib/emailStorage';
+import { saveEmailToDatabase } from '@/lib/emailDatabase';
 
 interface ContactFormData {
   firstName: string;
@@ -81,8 +82,12 @@ This is an automated confirmation email from matthewayinde.com
     
     console.log('📤 Sending emails...');
     
-    // Save email to CSV (with duplicate check)
-    await saveEmailToCSV(body.email, 'contact');
+    // Save email to database (production) or CSV (local)
+    if (process.env.MONGODB_URI) {
+      await saveEmailToDatabase(body.email, 'contact');
+    } else {
+      await saveEmailToCSV(body.email, 'contact');
+    }
     
     // Send email to admin
     await transporter.sendMail({

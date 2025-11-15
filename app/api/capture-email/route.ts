@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { saveEmailToCSV } from '@/lib/emailStorage';
+import { saveEmailToDatabase } from '@/lib/emailDatabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,8 +18,15 @@ export async function POST(request: NextRequest) {
 
     console.log('📧 New email captured:', email);
 
-    // Save to CSV file (with duplicate check)
-    const isNewEmail = await saveEmailToCSV(email, 'popup');
+    // Save to database (production) or CSV (local)
+    let isNewEmail = false;
+    if (process.env.MONGODB_URI) {
+      // Use database in production
+      isNewEmail = await saveEmailToDatabase(email, 'popup');
+    } else {
+      // Use CSV for local development
+      isNewEmail = await saveEmailToCSV(email, 'popup');
+    }
     
     if (!isNewEmail) {
       // Email already exists, but still send welcome email
