@@ -147,6 +147,9 @@ ${visitorData.email ? `📧 Email: ${visitorData.email}` : ''}
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('📍 Track visitor API called');
+    console.log('Email alerts enabled:', process.env.ENABLE_EMAIL_ALERTS);
+    
     const body = await request.json();
     const userAgent = request.headers.get('user-agent') || '';
     
