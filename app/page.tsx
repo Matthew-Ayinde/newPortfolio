@@ -378,6 +378,17 @@ const handleDownload = () => {
 export default function Portfolio() {
   const [activeSection, setActiveSection] = useState("home");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [formStatus, setFormStatus] = useState<{
+    type: 'idle' | 'loading' | 'success' | 'error';
+    message: string;
+  }>({ type: 'idle', message: '' });
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -433,6 +444,62 @@ export default function Portfolio() {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormStatus({ type: 'loading', message: 'Sending your message...' });
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setFormStatus({ 
+          type: 'success', 
+          message: 'Message sent successfully! Check your email for confirmation.' 
+        });
+        
+        // Store email for visitor tracking
+        localStorage.setItem('userEmail', formData.email);
+        
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+
+        // Clear success message after 5 seconds
+        setTimeout(() => {
+          setFormStatus({ type: 'idle', message: '' });
+        }, 5000);
+      } else {
+        setFormStatus({ 
+          type: 'error', 
+          message: data.error || 'Failed to send message. Please try again.' 
+        });
+      }
+    } catch (error) {
+      setFormStatus({ 
+        type: 'error', 
+        message: 'Network error. Please check your connection and try again.' 
+      });
     }
   };
 
@@ -2216,25 +2283,52 @@ export default function Portfolio() {
               viewport={{ once: true }}
               className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl border border-blue-500/30 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20"
             >
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Feedback Message */}
+                {formStatus.type !== 'idle' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`p-4 rounded-lg ${
+                      formStatus.type === 'success' 
+                        ? 'bg-green-500/20 border border-green-500/50 text-green-400' 
+                        : formStatus.type === 'error'
+                        ? 'bg-red-500/20 border border-red-500/50 text-red-400'
+                        : 'bg-blue-500/20 border border-blue-500/50 text-blue-400'
+                    }`}
+                  >
+                    {formStatus.message}
+                  </motion.div>
+                )}
+
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-blue-400 mb-2">
-                      First Name
+                      First Name *
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      required
+                      disabled={formStatus.type === 'loading'}
+                      className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400 disabled:opacity-50"
                       placeholder="John"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-blue-400 mb-2">
-                      Last Name
+                      Last Name *
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      required
+                      disabled={formStatus.type === 'loading'}
+                      className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400 disabled:opacity-50"
                       placeholder="Doe"
                     />
                   </div>
@@ -2242,44 +2336,60 @@ export default function Portfolio() {
 
                 <div>
                   <label className="block text-sm font-medium text-blue-400 mb-2">
-                    Email
+                    Email *
                   </label>
                   <input
                     type="email"
-                    className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    disabled={formStatus.type === 'loading'}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400 disabled:opacity-50"
                     placeholder="john@example.com"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-blue-400 mb-2">
-                    Subject
+                    Subject *
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    required
+                    disabled={formStatus.type === 'loading'}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400 disabled:opacity-50"
                     placeholder="Project Collaboration"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-blue-400 mb-2">
-                    Message
+                    Message *
                   </label>
                   <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
+                    required
+                    disabled={formStatus.type === 'loading'}
                     rows={6}
-                    className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 resize-none text-white placeholder-gray-400"
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-blue-500/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 resize-none text-white placeholder-gray-400 disabled:opacity-50"
                     placeholder="Tell me about your project..."
                   ></textarea>
                 </div>
 
                 <motion.button
                   type="submit"
-                  className="w-full px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/50"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  disabled={formStatus.type === 'loading'}
+                  className="w-full px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={formStatus.type !== 'loading' ? { scale: 1.02 } : {}}
+                  whileTap={formStatus.type !== 'loading' ? { scale: 0.98 } : {}}
                 >
-                  Send Message
+                  {formStatus.type === 'loading' ? 'Sending...' : 'Send Message'}
                 </motion.button>
               </form>
             </motion.div>
