@@ -679,10 +679,10 @@ export default function Portfolio() {
               transition={{ duration: 0.8, delay: 1.2 }}
             >
               {[
-                { number: "37+", label: "Projects Completed" },
+                { number: "57+", label: "Projects Completed" },
                 { number: "4+", label: "Years Experience" },
-                { number: "25+", label: "Happy Clients" },
-                { number: "18+", label: "Technologies Mastered" },
+                { number: "35+", label: "Happy Clients" },
+                { number: "28+", label: "Technologies Mastered" },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -2144,6 +2144,118 @@ export default function Portfolio() {
         </div>
       </section>
 
+      {/* Email Subscription Section */}
+      <section className="py-24 bg-gradient-to-br from-blue-900/20 via-gray-900/50 to-blue-800/20 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="relative"
+          >
+            <div className="bg-gray-800/60 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-blue-500/30 hover:border-blue-500/50 transition-all duration-300 shadow-2xl shadow-blue-500/10">
+              {/* Icon */}
+              <motion.div
+                className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/50"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.3 }}
+              >
+                <FaEnvelope className="text-3xl text-white" />
+              </motion.div>
+
+              {/* Heading */}
+              <h3 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">
+                Stay in the Loop! 🚀
+              </h3>
+              <p className="text-gray-400 text-center mb-8 text-lg">
+                Don't miss out! Drop your email and be the first to know when something awesome drops.
+              </p>
+
+              {/* Email Form */}
+              <form 
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const emailInput = e.currentTarget.querySelector('input[type="email"]') as HTMLInputElement;
+                  const submitBtn = e.currentTarget.querySelector('button[type="submit"]') as HTMLButtonElement;
+                  const feedbackDiv = document.getElementById('email-feedback');
+                  
+                  if (!emailInput || !submitBtn || !feedbackDiv) return;
+                  
+                  const email = emailInput.value;
+                  submitBtn.disabled = true;
+                  submitBtn.textContent = 'Subscribing...';
+                  
+                  try {
+                    const response = await fetch('/api/capture-email', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email }),
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                      feedbackDiv.className = 'text-green-400 text-center mt-4 font-semibold';
+                      feedbackDiv.textContent = '✓ Awesome! Check your email for confirmation.';
+                      emailInput.value = '';
+                      localStorage.setItem('userEmail', email);
+                      
+                      setTimeout(() => {
+                        feedbackDiv.textContent = '';
+                      }, 5000);
+                    } else {
+                      feedbackDiv.className = 'text-red-400 text-center mt-4';
+                      feedbackDiv.textContent = data.error || 'Something went wrong. Try again?';
+                    }
+                  } catch (error) {
+                    feedbackDiv.className = 'text-red-400 text-center mt-4';
+                    feedbackDiv.textContent = 'Network error. Please try again.';
+                  } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Subscribe';
+                  }
+                }}
+                className="max-w-xl mx-auto"
+              >
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    required
+                    className="flex-1 px-6 py-4 bg-gray-700/50 border border-blue-500/30 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-500 text-lg transition-all duration-300"
+                  />
+                  <motion.button
+                    type="submit"
+                    className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl hover:shadow-blue-500/50 whitespace-nowrap"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Subscribe
+                  </motion.button>
+                </div>
+                <div id="email-feedback" className="mt-4"></div>
+              </form>
+
+              <p className="text-xs text-gray-500 text-center mt-6">
+                No spam, no nonsense. Just cool updates when they happen. Unsubscribe anytime. 🤝
+              </p>
+            </div>
+
+            {/* Decorative elements */}
+            <motion.div
+              className="absolute -top-4 -left-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+              transition={{ duration: 4, repeat: Infinity }}
+            />
+            <motion.div
+              className="absolute -bottom-4 -right-4 w-32 h-32 bg-blue-600/10 rounded-full blur-2xl"
+              animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
+              transition={{ duration: 5, repeat: Infinity }}
+            />
+          </motion.div>
+        </div>
+      </section>
 
       {/* Enhanced Contact Section */}
       <section id="contact" className="py-32 relative overflow-hidden">
