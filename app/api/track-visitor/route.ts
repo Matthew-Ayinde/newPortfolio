@@ -188,10 +188,10 @@ export async function POST(request: NextRequest) {
       email: body.email || undefined,
     };
     
-    // Send notification (async, don't wait)
-    sendNotification(visitorData).catch(err => 
-      console.error('Notification failed:', err)
-    );
+    // Send notification - MUST await to ensure it completes before function ends
+    console.log('🚀 Sending notification...');
+    await sendNotification(visitorData);
+    console.log('✨ Notification process completed');
     
     // Optional: Save to database here
     // await saveToDatabase(visitorData);
