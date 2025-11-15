@@ -81,7 +81,14 @@ ${visitorData.email ? `📧 Email: ${visitorData.email}` : ''}
   // Example: Email, Telegram, Discord, Slack, etc.
   
   // EMAIL NOTIFICATION (using nodemailer)
+  console.log('🔍 Checking email alerts...');
+  console.log('ENABLE_EMAIL_ALERTS:', process.env.ENABLE_EMAIL_ALERTS);
+  console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set ✓' : 'Missing ✗');
+  console.log('EMAIL_PASSWORD:', process.env.EMAIL_PASSWORD ? 'Set ✓' : 'Missing ✗');
+  console.log('ALERT_EMAIL:', process.env.ALERT_EMAIL);
+  
   if (process.env.ENABLE_EMAIL_ALERTS === 'true') {
+    console.log('📧 Attempting to send email...');
     try {
       const nodemailer = require('nodemailer');
       
@@ -93,15 +100,19 @@ ${visitorData.email ? `📧 Email: ${visitorData.email}` : ''}
         },
       });
 
-      await transporter.sendMail({
+      const result = await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: process.env.ALERT_EMAIL,
         subject: '🚨 New Visitor Alert - Portfolio',
         text: message,
       });
+      
+      console.log('✅ Email sent successfully!', result.messageId);
     } catch (error) {
-      console.error('Email notification error:', error);
+      console.error('❌ Email notification error:', error);
     }
+  } else {
+    console.log('⚠️ Email alerts disabled or env var not "true"');
   }
 
   // TELEGRAM NOTIFICATION
